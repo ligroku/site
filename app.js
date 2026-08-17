@@ -12,7 +12,7 @@ const CONFIG = {
   source: {
     owner: "ligroku",
     repo: "mihous",
-    branch: "master",
+    branch: "main",
     github: "https://github.com/ligroku/mihous"
   }
 };
@@ -36,7 +36,7 @@ const CONFIG = {
   source: {
     owner: "ligroku",
     repo: "mihous",
-    branch: "master",
+    branch: "main",
     github: "https://github.com/ligroku/mihous"
   }
 };
