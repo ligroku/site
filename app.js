@@ -1,6 +1,6 @@
 const CONFIG = {
   owner: "ligroku",
-  repo: "mihous",
+  repo: "site",
   branch: "main",
 
   /*
