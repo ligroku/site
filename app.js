@@ -13,7 +13,6 @@ const CONFIG = {
 
   /*
    * Empty means repository root.
-   * https://github.com/ligroku/mihous
    */
   codeRoot: "",
 
