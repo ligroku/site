@@ -9,7 +9,7 @@ const CONFIG = {
    * Add .md files to this directory and
    * they automatically appear in the docs.
    */
-  docsRoot: "docs",
+  docsRoot: "docs/",
 
   /*
    * Empty means repository root.
