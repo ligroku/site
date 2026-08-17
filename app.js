@@ -14,7 +14,7 @@ const CONFIG = {
   /*
    * Empty means repository root.
    */
-  codeRoot: "",
+  codeRoot: "https://github.com/ligroku/mihous",
 
   github: "https://github.com/ligroku/mihous"
 };
