@@ -1,6 +1,6 @@
 const CONFIG = {
   owner: "ligroku",
-  repo: "mihous",
+  repo: "site",
   branch: "main",
 
   /*
@@ -9,7 +9,7 @@ const CONFIG = {
    * Add .md files to this directory and
    * they automatically appear in the docs.
    */
-  docsRoot: "website/docs",
+  docsRoot: "docs",
 
   /*
    * Empty means repository root.
