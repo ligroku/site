@@ -1,14 +1,47 @@
 const CONFIG = {
-  owner: "ligroku",
-  repo: "mihous",
-  branch: "main",
-  docsRoot: "docs",
-  codeRoot: "",
-  github: "https://github.com/ligroku/mihous"
+  // Website / documentation repository
+  site: {
+    owner: "ligroku",
+    repo: "site",
+    branch: "master",
+    docsRoot: "docs",
+    github: "https://github.com/ligroku/site"
+  },
+
+  // Actual Mihous source repository
+  source: {
+    owner: "ligroku",
+    repo: "mihous",
+    branch: "main",
+    github: "https://github.com/ligroku/mihous"
+  }
 };
 
+const apiBase = `https://api.github.com/repos/${CONFIG.site.owner}/${CONFIG.site.repo}`;
+const sourceApiBase = `https://api.github.com/repos/${CONFIG.source.owner}/${CONFIG.source.repo}`;
+const cache = new Map();
+
 const app = document.querySelector("#app");
-const apiBase = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}`;
+const CONFIG = {
+  // Website / documentation repository
+  site: {
+    owner: "ligroku",
+    repo: "site",
+    branch: "master",
+    docsRoot: "docs",
+    github: "https://github.com/ligroku/site"
+  },
+
+  // Actual Mihous source repository
+  source: {
+    owner: "ligroku",
+    repo: "mihous",
+    branch: "main",
+    github: "https://github.com/ligroku/mihous"
+  }
+};
+
+const sourceApiBase = `https://api.github.com/repos/${CONFIG.source.owner}/${CONFIG.source.repo}`;
 const cache = new Map();
 
 function escapeHtml(value = "") {
@@ -45,8 +78,8 @@ async function github(path, options = {}) {
   if (cache.has(key)) return cache.get(key);
 
   const url = options.raw
-    ? `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`
-    : `${apiBase}/contents/${path}?ref=${CONFIG.branch}`;
+    ? `https://raw.githubusercontent.com/${CONFIG.site.owner}/${CONFIG.site.repo}/${CONFIG.site.branch}/${path}`
+    : `${apiBase}/contents/${path}?ref=${CONFIG.site.branch}`;
 
   const response = await fetch(url, {
     headers: { "Accept": "application/vnd.github+json" }
@@ -61,7 +94,41 @@ async function github(path, options = {}) {
   return data;
 }
 
-async function getDocsFiles(path = CONFIG.docsRoot) {
+async function githubSource(path) {
+  const key = `source:${path}`;
+  if (cache.has(key)) return cache.get(key);
+
+  const url = `https://raw.githubusercontent.com/${CONFIG.source.owner}/${CONFIG.source.repo}/${CONFIG.source.branch}/${path}`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`GitHub source ${response.status}: ${response.statusText}`);
+  }
+
+  const data = await response.text();
+  cache.set(key, data);
+  return data;
+}
+
+async function githubSourceApi(path = "") {
+  const key = `source-api:${path}`;
+  if (cache.has(key)) return cache.get(key);
+
+  const url = `${sourceApiBase}/contents/${path}?ref=${CONFIG.source.branch}`;
+  const response = await fetch(url, {
+    headers: { "Accept": "application/vnd.github+json" }
+  });
+
+  if (!response.ok) {
+    throw new Error(`GitHub source API ${response.status}: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  cache.set(key, data);
+  return data;
+}
+
+async function getDocsFiles(path = CONFIG.site.docsRoot) {
   const data = await github(path);
   if (!Array.isArray(data)) return [];
 
@@ -381,7 +448,7 @@ async function docs(activePath) {
 
               <a
                 class="btn secondary"
-                href="${CONFIG.github}/blob/${CONFIG.branch}/${active}"
+                href="${CONFIG.site.github}/blob/${CONFIG.site.branch}/${active}"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -436,7 +503,7 @@ async function docs(activePath) {
 }
 
 async function flattenCode(path = "") {
-  const data = await github(path);
+  const data = await githubSourceApi(path);
   const items = Array.isArray(data) ? data : [data];
   const output = [];
 
@@ -452,6 +519,10 @@ async function flattenCode(path = "") {
   }
 
   return output;
+}
+
+async function getSourceFile(path) {
+  return githubSource(path);
 }
 
 async function codeBrowser(activePath) {
@@ -472,7 +543,7 @@ async function codeBrowser(activePath) {
     const selected = files.find(f => f.path === active);
 
     const code = selected
-      ? await github(selected.path, { raw: true })
+      ? await getSourceFile(selected.path)
       : "";
 
     app.innerHTML = `
@@ -519,7 +590,7 @@ async function codeBrowser(activePath) {
               <span>${escapeHtml(selected?.path || "No file selected")}</span>
 
               <a
-                href="${selected?.html_url || CONFIG.github}"
+                href="${selected?.html_url || CONFIG.source.github}"
                 target="_blank"
                 rel="noreferrer"
               >

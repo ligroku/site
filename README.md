@@ -138,18 +138,28 @@ The website configuration is at the beginning of:
 app.js
 ```
 
+The website repository is `ligroku/site` on the `master` branch. The source browser separately reads source files from `ligroku/mihous` on `main`.
+
 ```javascript
 const CONFIG = {
-  owner: "ligroku",
-  repo: "mihous",
-  branch: "main",
-  docsRoot: "docs",
-  codeRoot: "",
-  github: "https://github.com/ligroku/mihous"
+  site: {
+    owner: "ligroku",
+    repo: "site",
+    branch: "master",
+    docsRoot: "docs",
+    github: "https://github.com/ligroku/site"
+  },
+
+  source: {
+    owner: "ligroku",
+    repo: "mihous",
+    branch: "main",
+    github: "https://github.com/ligroku/mihous"
+  }
 };
 ```
 
-If you rename the repository, update this configuration.
+If you rename either repository or branch, update this configuration.
 
 ## Future editor
 
