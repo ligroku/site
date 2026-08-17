@@ -22,24 +22,6 @@ const sourceApiBase = `https://api.github.com/repos/${CONFIG.source.owner}/${CON
 const cache = new Map();
 
 const app = document.querySelector("#app");
-const CONFIG = {
-  // Website / documentation repository
-  site: {
-    owner: "ligroku",
-    repo: "site",
-    branch: "master",
-    docsRoot: "docs",
-    github: "https://github.com/ligroku/site"
-  },
-
-  // Actual Mihous source repository
-  source: {
-    owner: "ligroku",
-    repo: "mihous",
-    branch: "main",
-    github: "https://github.com/ligroku/mihous"
-  }
-};
 
 const sourceApiBase = `https://api.github.com/repos/${CONFIG.source.owner}/${CONFIG.source.repo}`;
 const cache = new Map();
@@ -67,7 +49,7 @@ function fileTitle(file) {
 }
 
 function categoryFromPath(path) {
-  const relative = path.replace(`${CONFIG.docsRoot}/`, "");
+  const relative = path.replace(`${CONFIG.site.docsRoot}/`, "");
   const parts = relative.split("/");
   if (parts.length <= 1) return "General";
   return parts[0].replace(/[-_]/g, " ");
