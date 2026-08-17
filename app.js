@@ -11,6 +11,10 @@ const CONFIG = {
    */
   docsRoot: "docs/",
 
+  codeOwner: "ligroku",
+  codeRepo: "mihous",
+  codeBranch: "main",
+
   /*
    * Empty means repository root.
    */
@@ -102,6 +106,34 @@ async function github(path, options = {}) {
   return data;
 }
 
+/*
+ * GitHub API для репозитория кода (mihous)
+ */
+async function githubCode(path, options = {}) {
+  const key = `${path}|${options.raw ? "raw" : "json"}`;
+
+  if (cache.has(key)) {
+    return cache.get(key);
+  }
+
+  const url = options.raw
+    ? `https://raw.githubusercontent.com/${CONFIG.codeOwner}/${CONFIG.codeRepo}/${CONFIG.codeBranch}/${path}`
+    : `https://api.github.com/repos/${CONFIG.codeOwner}/${CONFIG.codeRepo}/contents/${path}?ref=${CONFIG.codeBranch}`;
+
+  const response = await fetch(url, {
+    headers: {
+      "Accept": "application/vnd.github+json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`GitHub API ${response.status}: ${response.statusText}`);
+  }
+
+  const data = options.raw ? await response.text() : await response.json();
+  cache.set(key, data);
+  return data;
+}
 
 /*
  * Generic page layout
@@ -858,52 +890,31 @@ async function getTree(
     : [data];
 }
 
+/*
+ * Получить содержимое папки из репозитория кода
+ */
+async function getCodeTree(path = "") {
+  const data = await githubCode(path);
+  return Array.isArray(data) ? data : [data];
+}
 
 /*
- * Recursively flatten repository.
+ * Рекурсивно собрать все файлы из репозитория кода
  */
-
-async function flattenCode(
-  path = ""
-) {
-
-  const items =
-    await getTree(path);
-
-
+async function flattenCode(path = "") {
+  const items = await getCodeTree(path);
   const output = [];
 
-
   for (const item of items) {
-
-    if (
-      item.type === "dir" &&
-      !item.path.startsWith(".git")
-    ) {
-
-      output.push(
-        ...await flattenCode(
-          item.path
-        )
-      );
-
-    }
-
-    else if (
-      item.type === "file" &&
-      !item.path.startsWith(".github/")
-    ) {
-
+    if (item.type === "dir" && !item.path.startsWith(".git")) {
+      output.push(...await flattenCode(item.path));
+    } else if (item.type === "file" && !item.path.startsWith(".github/")) {
       output.push(item);
-
     }
-
   }
-
 
   return output;
 }
-
 
 /*
  * Source code browser
@@ -949,15 +960,9 @@ async function codeBrowser(
       );
 
 
-    const code =
-      selected
-        ? await github(
-            selected.path,
-            {
-              raw: true
-            }
-          )
-        : "";
+    const code = selected
+  ? await githubCode(selected.path, { raw: true })
+  : "";
 
 
     app.innerHTML = `
